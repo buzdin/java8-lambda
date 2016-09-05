@@ -52,7 +52,7 @@ abstract class LambdaInvocation implements MethodInvocation {
         }
     }
 
-    static StepDefinition getStepDefinition(LambdaInvocation lamdaInvocation, List<DataRecordProvider<?>> args) {
+    static StepDefinition getStepDefinition(LambdaInvocation lamdaInvocation, List<ValueProvider<?>> args) {
         return new StepDefinition(lamdaInvocation, args);
     }
 

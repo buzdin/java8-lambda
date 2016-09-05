@@ -11,12 +11,16 @@ public final class Calls {
         return LambdaInvocation.getStepDefinition(new LambdaInvocationV0(method), Lists.newArrayList());
     }
 
+    public static <T> StepDefinition call(LambdaInvocationV1.StepV1 method, ValueProvider<T> firstArg) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationV1<>(method), Lists.newArrayList(firstArg));
+    }
+
     public static <T> StepDefinition call(LambdaInvocationR0.StepR0 method) {
         return LambdaInvocation.getStepDefinition(new LambdaInvocationR0(method), Lists.newArrayList());
     }
 
-    public static <T> StepDefinition call(LambdaInvocationR1.StepR1<T> method, DataRecordProvider<T> firstArg) {
-        return LambdaInvocation.getStepDefinition(new LambdaInvocationR1(method), Lists.newArrayList(firstArg));
+    public static <T> StepDefinition call(LambdaInvocationR1.StepR1<T> method, ValueProvider<T> firstArg) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationR1<>(method), Lists.newArrayList(firstArg));
     }
 
 }

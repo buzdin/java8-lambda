@@ -17,7 +17,8 @@ public final class Execution {
         Object instance = type.newInstance();
         for (StepDefinition step : steps) {
             Method method = step.getLamdaInvocation().getMethod();
-            method.invoke(instance, step.getArgs().toArray());
+            Object[] args = step.getArgs();
+            method.invoke(instance, args);
         }
     }
 
