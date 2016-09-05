@@ -1,6 +1,7 @@
-package lv.jug.java8;
+package lv.jug.java8.serialized;
 
 import com.google.common.collect.Lists;
+import lv.jug.java8.serialized.Framework.StepDefinition;
 
 public final class Calls {
 

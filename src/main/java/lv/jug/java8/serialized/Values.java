@@ -1,4 +1,4 @@
-package lv.jug.java8;
+package lv.jug.java8.serialized;
 
 public final class Values {
 

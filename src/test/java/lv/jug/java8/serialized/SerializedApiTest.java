@@ -1,26 +1,23 @@
-package lv.jug.java8;
+package lv.jug.java8.serialized;
 
 import org.junit.Test;
 
-import static lv.jug.java8.Calls.call;
-import static lv.jug.java8.Values.value;
+import static lv.jug.java8.serialized.Calls.call;
+import static lv.jug.java8.serialized.Framework.framework;
+import static lv.jug.java8.serialized.Values.value;
 
-public class ApiTest {
+public class SerializedApiTest {
 
     @Test
-    public void shouldTest() throws Exception {
+    public void shouldRun() throws Exception {
         Example example = new Example();
 
-        Execution execution = framework(Example.class)
+        Framework.Execution execution = framework()
                 .addMethodCall(call(example::sayHello))
                 .addMethodCall(call(example::add, value(1)))
                 .build();
 
         execution.go();
-    }
-
-    private ExecutionBuilder framework(Class<?> type) {
-        return new ExecutionBuilder(type);
     }
 
     public static class Example {

@@ -1,4 +1,6 @@
-package lv.jug.java8;
+package lv.jug.java8.serialized;
+
+import lv.jug.java8.serialized.Framework.StepDefinition;
 
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
@@ -13,8 +15,8 @@ abstract class LambdaInvocation implements MethodInvocation {
     private final Method method;
 
     LambdaInvocation(SerializedLambda lambda) {
-        type = parseClass(lambda.getImplClass()); //todo logic in constructor to minimize code in extending classes. Replace by static create()?
-        method = findMethodByName(type, lambda.getImplMethodName()); //todo works by id. need method signature
+        type = parseClass(lambda.getImplClass());
+        method = findMethodByName(type, lambda.getImplMethodName());
     }
 
     private Method findMethodByName(Class<?> type, String methodName) {
@@ -26,7 +28,7 @@ abstract class LambdaInvocation implements MethodInvocation {
 
     private static Class<?> parseClass(String className) {
         try {
-            String testStepClass = className.replace("/", ".").trim(); //todo improve
+            String testStepClass = className.replace("/", ".").trim();
             return Class.forName(testStepClass);
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Not Valid Class", e);
