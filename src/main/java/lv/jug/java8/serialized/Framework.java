@@ -1,7 +1,10 @@
 package lv.jug.java8.serialized;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Framework {
 
@@ -60,10 +63,33 @@ public class Framework {
             for (StepDefinition step : steps) {
                 LambdaInvocation invocation = step.getLambdaInvocation();
                 Object[] args = step.getArgs();
-                invocation.execute(args);
+                Optional<Object> result = invocation.execute(args);
+                if (result.isPresent()) {
+                    System.out.println("RESULT : " + result.get());
+                }
             }
         }
 
+    }
+
+    public static <T> StepDefinition call(LambdaInvocationV0.TestStepV0 method) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationV0(method), Lists.newArrayList());
+    }
+
+    public static <T> StepDefinition call(LambdaInvocationV1.StepV1 method, ValueProvider<T> firstArg) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationV1<>(method), Lists.newArrayList(firstArg));
+    }
+
+    public static <T> StepDefinition call(LambdaInvocationR0.StepR0 method) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationR0(method), Lists.newArrayList());
+    }
+
+    public static <T> StepDefinition call(LambdaInvocationR1.StepR1<T> method, ValueProvider<T> firstArg) {
+        return LambdaInvocation.getStepDefinition(new LambdaInvocationR1<>(method), Lists.newArrayList(firstArg));
+    }
+
+    public static <T> ValueProvider<T> value(T value) {
+        return () -> value;
     }
 
 }

@@ -45,13 +45,22 @@ public class Framework2 {
         return function::apply;
     }
 
-    public static <T, U, R> StepDefinition<T> call(Function1<T, U, R> function, U value) {
-        return proxy -> function.apply(proxy, value);
+    public static <T, U, R> StepDefinition<T> call(Function1<T, U, R> function, ValueProvider<U> value1) {
+        return proxy -> function.apply(proxy, value1.get());
+    }
+
+    public static <T, U, V, R> StepDefinition<T> call(Function2<T, U, V, R> function, ValueProvider<U> value1, ValueProvider<V> value2) {
+        return proxy -> function.apply(proxy, value1.get(), value2.get());
     }
 
     interface Function1<T, U, R> {
         R apply(T t, U u);
     }
+
+    interface Function2<T, U, V, R> {
+        R apply(T t, U u, V v);
+    }
+
 
     public static class Execution<T> {
 
@@ -66,10 +75,15 @@ public class Framework2 {
         public void go() throws Exception {
             T instance = type.newInstance();
             for (RecordingObject.MethodCall step : steps) {
-                step.method.invoke(instance, step.args);
+                Object result = step.method.invoke(instance, step.args);
+                System.out.println("RESULT : " + result);
             }
         }
 
+    }
+
+    public static <T> ValueProvider<T> value(T value) {
+        return () -> value;
     }
 
 }

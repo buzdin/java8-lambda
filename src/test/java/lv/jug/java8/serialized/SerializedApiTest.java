@@ -2,9 +2,7 @@ package lv.jug.java8.serialized;
 
 import org.junit.Test;
 
-import static lv.jug.java8.serialized.Calls.call;
-import static lv.jug.java8.serialized.Framework.framework;
-import static lv.jug.java8.serialized.Values.value;
+import static lv.jug.java8.serialized.Framework.*;
 
 public class SerializedApiTest {
 
@@ -24,12 +22,12 @@ public class SerializedApiTest {
 
         public String sayHello() {
             System.out.println("Hello");
-            return "";
+            return "1";
         }
 
         public String add(Integer x) {
-            System.out.printf("add" + x);
-            return "";
+            System.out.println("add" + x);
+            return "2";
         }
 
     }

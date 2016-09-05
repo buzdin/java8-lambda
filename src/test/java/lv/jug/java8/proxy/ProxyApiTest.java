@@ -10,7 +10,8 @@ public class ProxyApiTest {
     public void shouldRun() throws Exception {
         Execution execution = framework2(Example.class)
                 .addMethodCall(call(Example::sayHello))
-                .addMethodCall(call(Example::add, 1))
+                .addMethodCall(call(Example::add, value(1)))
+                .addMethodCall(call(Example::minus, value(1), value(1)))
                 .build();
 
         execution.go();
@@ -20,12 +21,16 @@ public class ProxyApiTest {
 
         public String sayHello() {
             System.out.println("Hello");
-            return "";
+            return "1";
         }
 
         public String add(Integer x) {
-            System.out.printf("add" + x);
-            return "";
+            System.out.println("add" + x);
+            return "2";
+        }
+
+        public Integer minus(Integer x, Integer y) {
+            return x - y;
         }
 
     }
