@@ -1,10 +1,10 @@
 package lv.jug.java8.proxy;
 
+import lv.jug.java8.RecordingObject;
 import net.sf.cglib.proxy.Enhancer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class Framework2 {
 
@@ -41,23 +41,27 @@ public class Framework2 {
         void apply(T proxy);
     }
 
-    public static <T, U> StepDefinition<T> call(Function<T, U> function) {
+    public static <T, U> StepDefinition<T> call(Lambda0<T, U> function) {
         return function::apply;
     }
 
-    public static <T, U, R> StepDefinition<T> call(Function1<T, U, R> function, ValueProvider<U> value1) {
+    public static <T, U, R> StepDefinition<T> call(Lambda1<T, U, R> function, ValueProvider<U> value1) {
         return proxy -> function.apply(proxy, value1.get());
     }
 
-    public static <T, U, V, R> StepDefinition<T> call(Function2<T, U, V, R> function, ValueProvider<U> value1, ValueProvider<V> value2) {
+    public static <T, U, V, R> StepDefinition<T> call(Lambda2<T, U, V, R> function, ValueProvider<U> value1, ValueProvider<V> value2) {
         return proxy -> function.apply(proxy, value1.get(), value2.get());
     }
 
-    interface Function1<T, U, R> {
+    interface Lambda0<T, R> {
+        R apply(T t);
+    }
+
+    interface Lambda1<T, U, R> {
         R apply(T t, U u);
     }
 
-    interface Function2<T, U, V, R> {
+    interface Lambda2<T, U, V, R> {
         R apply(T t, U u, V v);
     }
 
