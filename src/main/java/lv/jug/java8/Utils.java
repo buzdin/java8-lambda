@@ -10,7 +10,8 @@ public class Utils {
     public static SerializedLambda serializedLambda(Serializable lambda) {
         final Method method;
         try {
-            method = lambda.getClass().getDeclaredMethod("writeReplace");
+            Class<? extends Serializable> lambdaClass = lambda.getClass();
+            method = lambdaClass.getDeclaredMethod("writeReplace");
             method.setAccessible(true);
             return (SerializedLambda) method.invoke(lambda);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
