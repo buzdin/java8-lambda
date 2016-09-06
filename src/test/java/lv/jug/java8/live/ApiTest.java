@@ -1,13 +1,13 @@
 package lv.jug.java8.live;
 
-import lv.jug.java8.Utils;
+import lv.jug.java8.RecordingObject;
+import net.sf.cglib.proxy.Enhancer;
 import org.junit.Test;
 
 import java.io.Serializable;
-import java.lang.invoke.SerializedLambda;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public class ApiTest {
 
@@ -22,138 +22,79 @@ public class ApiTest {
 
     @Test
     public void demo() throws Exception {
-        Example example = new Example();
-
-        Execution e = framework()
-                .addMethodCall(call(example::hello))
-                .addMethodCall(call(example::add, 1, 2))
+        Execution e = framework(Example.class)
+                .addMethodCall(call(Example::hello))
+                .addMethodCall(call(Example::add, 1, 2))
                 .build();
 
         e.run();
     }
 
-    private static MethodBuilder framework() {
-        return new MethodBuilder();
+    private static <T> MethodBuilder<T> framework(Class<T> type) {
+        return new MethodBuilder<>(type);
     }
 
-    private static class MethodBuilder {
+    private static class MethodBuilder<T> {
 
-        List<StepDefinition> steps = new ArrayList<>();
+        private final Class<T> type;
 
-        public MethodBuilder addMethodCall(StepDefinition step) {
-            steps.add(step);
+        List<RecordingObject.MethodCall> steps = new ArrayList<>();
+
+        public MethodBuilder(Class<T> type) {
+            this.type = type;
+        }
+
+        public MethodBuilder addMethodCall(StepDefinition<T> step) {
+            RecordingObject recordingObject = new RecordingObject();
+            Object proxy = Enhancer.create(type, recordingObject);
+            step.apply((T) proxy);
+            List<RecordingObject.MethodCall> recordedCalls = recordingObject.getRecordedCalls();
+            steps.addAll(recordedCalls);
             return this;
         }
 
-        public Execution build() {
-            return new Execution(steps);
+        public Execution<T> build() {
+            return new Execution<T>(type, steps);
         }
     }
 
     public interface Lambda0<T> extends Serializable {
-        void apply();
+        void apply(T t);
     }
 
-    public interface Lambda2<U, F> extends Serializable {
-        Object apply(U u, F f);
+    public interface Lambda2<T, U, V, R> extends Serializable {
+        R apply(T t, U u, V v);
     }
 
-    private static StepDefinition call(Lambda0 lambda) {
-        return new StepDefinition(new Lambda0Wrapper(lambda), new Object[] {});
+    private static <T> StepDefinition<T> call(Lambda0<T> lambda) {
+        return lambda::apply;
     }
 
-    private static <U, F> StepDefinition call(Lambda2<U, F> lambda, U u, F f) {
-        return new StepDefinition(new Lambda2Wrapper(lambda), new Object[] {u, f});
+    private static <T, U, V, R> StepDefinition call(Lambda2<T, U, V, R> lambda, U u, V v) {
+        return (StepDefinition<T>) proxy -> lambda.apply(proxy, u, v);
     }
 
-    private static class Execution {
+    private static class Execution<T> {
 
-        private final List<StepDefinition> steps;
+        private final Class<T> type;
+        private final List<RecordingObject.MethodCall> steps;
 
-        public Execution(List<StepDefinition> steps) {
+        public Execution(Class<T> type, List<RecordingObject.MethodCall> steps) {
+            this.type = type;
             this.steps = steps;
         }
 
         void run() throws Exception {
-            for (StepDefinition step : steps) {
-                LambdaWrapper wrapper = step.getLambda();
-                Object[] args = step.getArgs();
-
-                SerializedLambda lambda = wrapper.getLambda();
-                System.out.println(lambda.getImplClass() + "::" + lambda.getImplMethodName());
-                // running the lambda
-                Optional<Object> optional = wrapper.execute(args);
-
-                if (optional.isPresent()) {
-                    System.out.println("RESULT -> " + optional.get());
-                }
+            for (RecordingObject.MethodCall step : steps) {
+                System.out.println(step.method + " :: " + Arrays.toString(step.args));
+                T instance = type.newInstance();
+                Object result = step.method.invoke(instance, step.args);
+                System.out.println("RESULT : " + result);
             }
         }
     }
 
-    private static abstract class LambdaWrapper implements LambdaInvocation {
-
-        private final SerializedLambda lambda;
-
-        public LambdaWrapper(SerializedLambda lambda) {
-            this.lambda = lambda;
-        }
-
-        public SerializedLambda getLambda() {
-            return lambda;
-        }
-    }
-
-    private static class Lambda0Wrapper extends LambdaWrapper {
-        private final Lambda0 lambda;
-
-        public Lambda0Wrapper(Lambda0 lambda) {
-            super(Utils.serializedLambda(lambda));
-            this.lambda = lambda;
-        }
-
-        @Override
-        public Optional<Object> execute(Object... args) throws Exception {
-            lambda.apply();
-            return Optional.empty();
-        }
-    }
-
-    private static class Lambda2Wrapper extends LambdaWrapper {
-        private final Lambda2 lambda;
-
-        public Lambda2Wrapper(Lambda2 lambda) {
-            super(Utils.serializedLambda(lambda));
-            this.lambda = lambda;
-        }
-
-        @Override
-        public Optional<Object> execute(Object... args) throws Exception {
-            Object result = lambda.apply(args[0], args[1]);
-            return Optional.of(result);
-        }
-    }
-
-    interface LambdaInvocation {
-        Optional<Object> execute(Object... args) throws Exception;
-    }
-
-    private static class StepDefinition {
-
-        private final LambdaWrapper lambda;
-        private final Object[] args;
-
-        public StepDefinition(LambdaWrapper invocation, Object[] args) {
-            this.lambda = invocation;
-            this.args = args;
-        }
-
-        public LambdaWrapper getLambda() {
-            return lambda;
-        }
-
-        public Object[] getArgs() {
-            return args;
-        }
+    private interface StepDefinition<T> {
+        void apply(T proxy);
     }
 }
